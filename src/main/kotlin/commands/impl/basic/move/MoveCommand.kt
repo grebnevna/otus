@@ -1,11 +1,13 @@
 package commands.impl.basic.move
 
 import commands.Command
-import exceptions.MoveException
+import models.Movable
+import models.Vector
 
-class MoveCommand: Command {
+class MoveCommand(private val obj: Movable): Command {
     override fun execute() {
-        println("MoveCommand")
-        throw MoveException()
+        val newPosition = Vector.plus(obj.getPosition(), obj.getVelocity())
+
+        obj.setPosition(newPosition)
     }
 }

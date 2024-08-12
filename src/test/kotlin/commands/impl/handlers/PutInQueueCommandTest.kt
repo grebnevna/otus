@@ -1,15 +1,15 @@
-package commands
+package commands.impl.handlers
 
 import ExceptionHandler
+import commands.Command
 import commands.impl.basic.move.MoveCommand
 import commands.impl.basic.stop.StopCommand
 import commands.impl.basic.stop.StopDoubleRetryCommand
 import commands.impl.basic.stop.StopRetryCommand
-import commands.impl.handlers.PutInQueueCommand
-import commands.impl.handlers.WriteInLogCommand
 import exceptions.StopException
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
+import java.lang.RuntimeException
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.concurrent.timerTask
@@ -23,13 +23,16 @@ class PutInQueueCommandTest {
 
         ExceptionHandler.registerHandler(
             "MoveCommand",
-            "MoveException"
+            "RuntimeException"
         ) { c: Command, e: Exception, q: Queue<Command>? ->
             PutInQueueCommand(WriteInLogCommand(c, e), q!!)
         }
 
         val queue: Queue<Command> = LinkedBlockingQueue()
-        val moveCommand = MoveCommand()
+
+        val moveCommand = mock(MoveCommand::class.java)
+
+        `when`(moveCommand.execute()).thenThrow(RuntimeException())
 
         queue.add(moveCommand)
 
@@ -43,7 +46,7 @@ class PutInQueueCommandTest {
         assertTrue(queue.last() is WriteInLogCommand)
     }
 
-    // задание 8
+    // задание 8 hw3
     @Test
     fun `first exception - retry command, second - write in log`() {
         val stopRetryCommand = spy(StopRetryCommand())
@@ -92,7 +95,7 @@ class PutInQueueCommandTest {
         verify(writeInLogForStopCommand, times(1)).execute()
     }
 
-    // задание 9
+    // задание 9 hw3
     @Test
     fun `retry command twice then write in log`() {
         val stopRetryCommand = spy(StopRetryCommand())

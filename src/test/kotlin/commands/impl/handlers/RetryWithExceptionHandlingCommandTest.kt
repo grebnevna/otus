@@ -1,12 +1,13 @@
-package commands
+package commands.impl.handlers
 
 import ExceptionHandler
+import commands.Command
 import commands.impl.basic.move.MoveCommand
-import commands.impl.handlers.WriteInLogCommand
 import commands.impl.handlers.retry.RetryWithExceptionHandlingCommand
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.*
+import java.lang.RuntimeException
 import java.util.*
 import java.util.concurrent.LinkedBlockingQueue
 
@@ -16,7 +17,7 @@ internal class RetryWithExceptionHandlingCommandTest {
     fun setUp() {
         ExceptionHandler.registerHandler(
             "MoveCommand",
-            "MoveException"
+            "RuntimeException"
         ) { c: Command, e: Exception, q: Queue<Command>? ->
             RetryWithExceptionHandlingCommand(c, WriteInLogCommand(c, e))
         }
@@ -25,7 +26,8 @@ internal class RetryWithExceptionHandlingCommandTest {
     @Test
     fun `handler retries throwing exception command`() {
         val queue: Queue<Command> = LinkedBlockingQueue()
-        val moveCommand = spy(MoveCommand())
+        val moveCommand = mock(MoveCommand::class.java)
+        `when`(moveCommand.execute()).thenThrow(RuntimeException())
 
         queue.add(moveCommand)
 

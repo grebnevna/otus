@@ -1,11 +1,11 @@
-package commands
+package commands.impl.handlers
 
 import commands.impl.basic.move.MoveCommand
-import commands.impl.handlers.WriteInLogCommand
 import exceptions.MoveException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -27,7 +27,9 @@ internal class WriteInLogCommandTest {
 
     @Test
     fun `command execution should print correct line`() {
-        val moveExceptionCommand = WriteInLogCommand(MoveCommand(), MoveException())
+        val moveCommand = Mockito.mock(MoveCommand::class.java)
+
+        val moveExceptionCommand = WriteInLogCommand(moveCommand, MoveException())
         moveExceptionCommand.execute()
 
         assertEquals("MoveException is intercepted during MoveCommand running\n", outContent.toString())
